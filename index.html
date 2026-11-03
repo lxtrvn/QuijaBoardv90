@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NECRO-SCAN // Environmental Entropy & Spirit Box</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        occult: {
+                            950: '#050308',
+                            900: '#0f0a14',
+                            800: '#1b1224',
+                            700: '#2c1c38',
+                            600: '#462c5b',
+                            accent: '#9333ea',
+                            glow: '#e879f9',
+                            amber: '#fbbf24',
+                            brass: '#eab308',
+                            terminal: '#10b981'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'Georgia', 'serif'],
+                        mono: ['Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cinzel', serif;
+            background-color: #050308;
+            color: #d1d5db;
+            overflow-x: hidden;
+        }
+        .vintage-type {
+            font-family: 'Special Elite', monospace;
+        }
+        /* CRT Scanlines and Vignette */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 50;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
+        .vignette {
+            box-shadow: inset 0 0 120px rgba(0,0,0,0.95);
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4)); }
+            50% { opacity: 0.8; filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.8)); }
+        }
+        .scanner-glow {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0a14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #462c5b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9333ea;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between crt vignette select-none relative">
+
+    <!-- Ambient Lighting Glow Element -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px] bg-purple-950/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+
+    <!-- Header Navigation -->
+    <header class="w-full py-3 px-4 md:px-8 border-b border-occult-700 bg-occult-900/90 backdrop-blur-md flex flex-col md:flex-row items-center justify-between z-40 shadow-2xl gap-3">
+        <div class="flex items-center space-x-3">
+            <svg class="w-7 h-7 text-occult-terminal animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            <div>
+                <h1 class="text-lg md:text-xl font-black tracking-widest text-occult-brass">NECRO-SCAN // V-90 HARDWARE</h1>
+                <p class="text-[10px] text-occult-terminal tracking-widest">ENVIRONMENTAL ENTROPY & PHONETIC SPIRIT BOX</p>
+            </div>
+        </div>
+
+        <!-- Master Session Controls -->
+        <div class="flex items-center space-x-3 flex-wrap justify-center">
+            <button id="masterPowerBtn" class="px-5 py-2 bg-gradient-to-r from-red-950 to-occult-800 hover:from-red-900 hover:to-occult-700 text-occult-brass border border-occult-brass/40 rounded shadow-lg transition-all transform active:scale-95 font-bold tracking-wider flex items-center space-x-2 text-xs">
+                <span id="powerIndicator" class="w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_10px_#dc2626]"></span>
+                <span id="powerText">SESSION OFFLINE</span>
+            </button>
+            <button id="calibrateBtn" class="px-4 py-2 bg-occult-800 hover:bg-occult-700 text-occult-terminal border border-occult-terminal/50 rounded text-xs font-bold tracking-wider transition shadow">
+                SURFACE LOCK CALIBRATION
+            </button>
+            <button id="helpBtn" class="px-3 py-2 bg-occult-800 hover:bg-occult-700 text-gray-300 border border-occult-600 rounded text-xs tracking-wider transition">
+                MANUAL
+            </button>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="flex-grow flex flex-col xl:flex-row items-center justify-center p-3 md:p-6 gap-6 max-w-7xl mx-auto w-full z-10">
+
+        <!-- Left / Center: Ouija Board & Sensor Visualizer Hub -->
+        <div class="flex-grow flex flex-col items-center justify-center w-full max-w-4xl">
+            
+            <!-- Ouija Board Surface with Embedded Planchette -->
+            <div id="ouijaBoard" class="relative w-full aspect-[16/10] bg-gradient-to-b from-[#18100d] via-[#100a06] to-[#070402] border-8 border-[#302012] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9),inset_0_0_90px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col items-center justify-between p-6 select-none">
+                
+                <!-- Wood grain backdrop tint -->
+                <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-800/40 via-transparent to-black pointer-events-none"></div>
+
+                <!-- Top Arch: YES / NO -->
+                <div class="w-full flex justify-between items-center px-8 md:px-16 z-20 mt-1">
+                    <div id="target-yes" class="text-3xl md:text-5xl font-black text-occult-brass tracking-widest drop-shadow-[0_2px_10px_rgba(234,179,8,0.6)] transition duration-300">YES</div>
+                    <div class="text-2xl md:text-4xl font-black text-occult-brass tracking-[0.3em] opacity-80">ENTROPY OUIJA</div>
+                    <div id="target-no" class="text-3xl md:text-5xl font-black text-occult-brass tracking-widest drop-shadow-[0_2px_10px_rgba(234,179,8,0.6)] transition duration-300">NO</div>
+                </div>
+
+                <!-- Center Mystical Emblem -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-15 flex flex-col items-center">
+                    <svg class="w-64 h-64 text-occult-brass" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                </div>
+
+                <!-- Letter and Number Matrix -->
+                <div class="w-full flex flex-col items-center justify-center space-y-3 md:space-y-4 my-auto z-20">
+                    <!-- Row 1: A-M -->
+                    <div class="flex justify-center space-x-2.5 md:space-x-5 text-lg md:text-2xl font-black text-amber-100/90 tracking-wide">
+                        <span data-char="A" class="board-char hover:text-occult-glow cursor-pointer transition">A</span>
+                        <span data-char="B" class="board-char hover:text-occult-glow cursor-pointer transition">B</span>
+                        <span data-char="C" class="board-char hover:text-occult-glow cursor-pointer transition">C</span>
+                        <span data-char="D" class="board-char hover:text-occult-glow cursor-pointer transition">D</span>
+                        <span data-char="E" class="board-char hover:text-occult-glow cursor-pointer transition">E</span>
+                        <span data-char="F" class="board-char hover:text-occult-glow cursor-pointer transition">F</span>
+                        <span data-char="G" class="board-char hover:text-occult-glow cursor-pointer transition">G</span>
+                        <span data-char="H" class="board-char hover:text-occult-glow cursor-pointer transition">H</span>
+                        <span data-char="I" class="board-char hover:text-occult-glow cursor-pointer transition">I</span>
+                        <span data-char="J" class="board-char hover:text-occult-glow cursor-pointer transition">J</span>
+                        <span data-char="K" class="board-char hover:text-occult-glow cursor-pointer transition">K</span>
+                        <span data-char="L" class="board-char hover:text-occult-glow cursor-pointer transition">L</span>
+                        <span data-char="M" class="board-char hover:text-occult-glow cursor-pointer transition">M</span>
+                    </div>
+                    <!-- Row 2: N-Z -->
+                    <div class="flex justify-center space-x-2.5 md:space-x-5 text-lg md:text-2xl font-black text-amber-100/90 tracking-wide">
+                        <span data-char="N" class="board-char hover:text-occult-glow cursor-pointer transition">N</span>
+                        <span data-char="O" class="board-char hover:text-occult-glow cursor-pointer transition">O</span>
+                        <span data-char="P" class="board-char hover:text-occult-glow cursor-pointer transition">P</span>
+                        <span data-char="Q" class="board-char hover:text-occult-glow cursor-pointer transition">Q</span>
+                        <span data-char="R" class="board-char hover:text-occult-glow cursor-pointer transition">R</span>
+                        <span data-char="S" class="board-char hover:text-occult-glow cursor-pointer transition">S</span>
+                        <span data-char="T" class="board-char hover:text-occult-glow cursor-pointer transition">T</span>
+                        <span data-char="U" class="board-char hover:text-occult-glow cursor-pointer transition">U</span>
+                        <span data-char="V" class="board-char hover:text-occult-glow cursor-pointer transition">V</span>
+                        <span data-char="W" class="board-char hover:text-occult-glow cursor-pointer transition">W</span>
+                        <span data-char="X" class="board-char hover:text-occult-glow cursor-pointer transition">X</span>
+                        <span data-char="Y" class="board-char hover:text-occult-glow cursor-pointer transition">Y</span>
+                        <span data-char="Z" class="board-char hover:text-occult-glow cursor-pointer transition">Z</span>
+                    </div>
+                    <!-- Row 3: Numbers -->
+                    <div class="flex justify-center space-x-3 md:space-x-6 text-base md:text-xl font-bold text-occult-brass/90">
+                        <span data-char="1" class="board-char hover:text-occult-glow cursor-pointer transition">1</span>
+                        <span data-char="2" class="board-char hover:text-occult-glow cursor-pointer transition">2</span>
+                        <span data-char="3" class="board-char hover:text-occult-glow cursor-pointer transition">3</span>
+                        <span data-char="4" class="board-char hover:text-occult-glow cursor-pointer transition">4</span>
+                        <span data-char="5" class="board-char hover:text-occult-glow cursor-pointer transition">5</span>
+                        <span data-char="6" class="board-char hover:text-occult-glow cursor-pointer transition">6</span>
+                        <span data-char="7" class="board-char hover:text-occult-glow cursor-pointer transition">7</span>
+                        <span data-char="8" class="board-char hover:text-occult-glow cursor-pointer transition">8</span>
+                        <span data-char="9" class="board-char hover:text-occult-glow cursor-pointer transition">9</span>
+                        <span data-char="0" class="board-char hover:text-occult-glow cursor-pointer transition">0</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Arch: GOODBYE -->
+                <div class="w-full flex justify-center items-center z-20 mb-1">
+                    <div id="target-goodbye" class="text-2xl md:text-3xl font-black text-occult-brass tracking-[0.2em] drop-shadow-[0_2px_10px_rgba(234,179,8,0.6)] transition duration-300">GOODBYE</div>
+                </div>
+
+                <!-- SVG Planchette -->
+                <div id="planchette" class="absolute w-20 h-28 md:w-28 md:h-38 pointer-events-none transition-transform duration-75 ease-out z-30" style="transform: translate(300px, 180px);">
+                    <svg viewBox="0 0 100 130" class="w-full h-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)] filter drop-shadow-[0_0_10px_rgba(232,121,249,0.4)]">
+                        <path d="M50 5 C20 40, 5 95, 20 120 C30 135, 70 135, 80 120 C95 95, 80 40, 50 5 Z" fill="#24170e" stroke="#eab308" stroke-width="2.5"/>
+                        <path d="M50 15 C25 45, 12 92, 24 115 C33 128, 67 128, 76 115 C88 92, 75 45, 50 15 Z" fill="#140d08" opacity="0.9"/>
+                        <ellipse cx="50" cy="75" rx="15" ry="19" fill="#070402" stroke="#eab308" stroke-width="2"/>
+                        <ellipse cx="50" cy="75" rx="11" ry="14" fill="#0f0a14" opacity="0.8"/>
+                        <line x1="50" y1="65" x2="50" y2="85" stroke="#e879f9" stroke-width="1.5" opacity="0.8"/>
+                        <line x1="40" y1="75" x2="60" y2="75" stroke="#e879f9" stroke-width="1.5" opacity="0.8"/>
+                        <circle cx="50" cy="35" r="3.5" fill="#eab308"/>
+                    </svg>
+                </div>
+
+            </div>
+
+            <!-- Board Action Bar -->
+            <div class="flex flex-wrap items-center justify-between w-full mt-3 gap-3">
+                <div class="flex items-center space-x-2">
+                    <button id="summonBtn" class="px-4 py-2 bg-occult-700 hover:bg-occult-600 text-occult-brass border border-occult-500 rounded text-xs font-bold tracking-wider shadow transition">
+                        INVOKE ENTITY
+                    </button>
+                    <button id="dismissBtn" class="px-4 py-2 bg-occult-800 hover:bg-occult-700 text-gray-300 border border-occult-600 rounded text-xs tracking-wider transition">
+                        SAY GOODBYE
+                    </button>
+                </div>
+                <div class="flex items-center space-x-3 text-xs text-occult-terminal font-mono bg-occult-900/90 px-4 py-2 rounded border border-occult-700 scanner-glow">
+                    <span class="inline-block w-2 h-2 rounded-full bg-occult-terminal animate-ping"></span>
+                    <span id="entityStatus">STATUS: DORMANT / AWAITING CALIBRATION</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Hardware Telemetry, Phonetic Engine & EVP Log -->
+        <div class="w-full xl:w-96 flex flex-col space-y-4">
+            
+            <!-- Sensor Telemetry Dashboard -->
+            <div class="bg-occult-900/95 border border-occult-700 rounded-xl p-4 shadow-xl backdrop-blur-md relative overflow-hidden">
+                <h2 class="text-xs font-bold tracking-widest text-occult-brass mb-3 flex items-center justify-between">
+                    <span>HARDWARE & SENSOR ENTROPY</span>
+                    <span id="lockStatus" class="text-[10px] text-gray-400 font-mono">UNLOCKED</span>
+                </h2>
+
+                <!-- Telemetry Readouts Grid -->
+                <div class="grid grid-cols-2 gap-2 text-xs font-mono mb-4 bg-black/60 p-2.5 rounded border border-occult-800">
+                    <div class="text-gray-400">GYRO (X/Y): <span id="teleGyro" class="text-occult-terminal">0.00 / 0.00</span></div>
+                    <div class="text-gray-400">ACCEL (Z): <span id="teleAccel" class="text-occult-terminal">1.00G</span></div>
+                    <div class="text-gray-400">MAG (μT): <span id="teleMag" class="text-occult-terminal">45.2</span></div>
+                    <div class="text-gray-400">MIC RMS: <span id="teleMic" class="text-occult-terminal">0.00</span></div>
+                    <div class="col-span-2 text-gray-400 pt-1 border-t border-occult-800/60 flex justify-between">
+                        <span>TOTAL ENTROPY INDEX:</span>
+                        <span id="entropyIndex" class="text-occult-glow font-bold">0.0%</span>
+                    </div>
+                </div>
+
+                <!-- Oscilloscope / Formant Visualizer Canvas -->
+                <div class="w-full h-20 bg-black/90 border border-occult-700 rounded mb-4 relative overflow-hidden">
+                    <canvas id="scopeCanvas" class="w-full h-full"></canvas>
+                    <div class="absolute bottom-1 right-2 text-[9px] font-mono text-occult-terminal tracking-wider">FORMANT SYNTH v2.4</div>
+                </div>
+
+                <!-- Sensitivity Controls -->
+                <div class="space-y-2.5 text-xs">
+                    <div>
+                        <div class="flex justify-between text-gray-400 mb-1">
+                            <span>PHONETIC SWEEP RATE</span>
+                            <span id="sweepSpeedVal" class="font-mono text-occult-brass">140 ms</span>
+                        </div>
+                        <input id="sweepSpeedRange" type="range" min="40" max="350" value="140" class="w-full accent-occult-accent cursor-pointer">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-gray-400 mb-1">
+                            <span>MIC ENTROPY GAIN</span>
+                            <span id="micGainVal" class="font-mono text-occult-brass">50%</span>
+                        </div>
+                        <input id="micGainRange" type="range" min="0" max="100" value="50" class="w-full accent-occult-accent cursor-pointer">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-gray-400 mb-1">
+                            <span>REVERB ECHO DEPTH</span>
+                            <span id="reverbVal" class="font-mono text-occult-brass">70%</span>
+                        </div>
+                        <input id="reverbRange" type="range" min="0" max="100" value="70" class="w-full accent-occult-accent cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spectral Transcript & Console Log -->
+            <div class="bg-occult-900/95 border border-occult-700 rounded-xl p-4 shadow-xl backdrop-blur-md flex flex-col h-64">
+                <div class="flex items-center justify-between mb-2 pb-2 border-b border-occult-800">
+                    <h2 class="text-xs font-bold tracking-widest text-occult-brass">EVP SPECTRAL TRANSCRIPT</h2>
+                    <button id="clearLogBtn" class="text-[10px] text-gray-400 hover:text-occult-glow transition uppercase tracking-wider">CLEAR</button>
+                </div>
+                
+                <div id="transcriptLog" class="flex-grow overflow-y-auto vintage-type text-xs text-occult-terminal/90 space-y-1.5 p-2 bg-black/60 rounded border border-occult-800">
+                    <div class="text-gray-500 italic">[System ready. Place device on stable surface and click 'Surface Lock'.]</div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-2.5 px-6 border-t border-occult-700 bg-occult-900/90 text-center text-[10px] text-gray-500 tracking-wider">
+        NECRO-SCAN &bull; PROCEDURAL PHONETIC MODULATION & SENSOR ENTROPY ENGINE
+    </footer>
+
+    <!-- Help / Manual Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-occult-900 border border-occult-600 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+            <h3 class="text-lg font-black text-occult-brass mb-3 tracking-widest">OPERATION MANUAL</h3>
+            <div class="space-y-3 text-xs md:text-sm text-gray-300 leading-relaxed mb-6">
+                <p><strong>1. Power On:</strong> Click <strong>SESSION OFFLINE</strong> at the top to initialize the Web Audio API phonetic synthesis engine and microphone feed.</p>
+                <p><strong>2. Surface Lock Calibration:</strong> Place your device on a stable flat surface and click <strong>SURFACE LOCK</strong>. The system measures baseline accelerometer and gyro drift so environmental disturbances can trigger spirit responses.</p>
+                <p><strong>3. Procedural Phonetics:</strong> Instead of static audio loops, the app synthesizes dynamic vocal formants and consonant-vowel pairs modulated in real-time by phone sensors and room microphone noise.</p>
+                <p><strong>4. Invocation:</strong> Click <strong>INVOKE ENTITY</strong> to initiate contact. The planchette will spell out words driven by environmental entropy fluctuations.</p>
+            </div>
+            <button id="closeHelpBtn" class="w-full py-2 bg-occult-accent hover:bg-purple-700 text-white font-bold rounded transition tracking-widest text-xs">
+                RETURN TO SESSION
+            </button>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // --- State Management ---
+        let audioCtx = null;
+        let isSessionActive = false;
+        let isInvoked = false;
+        let isCalibrated = false;
+        let sweepInterval = null;
+        let activeEntity = null;
+        let targetQueue = [];
+        let planchettePos = { x: 0, y: 0 };
+        let targetPos = { x: 0, y: 0 };
+
+        // Audio Nodes
+        let masterGain = null;
+        let delayNode = null;
+        let delayFeedback = null;
+        let micStream = null;
+        let micSource = null;
+        let analyser = null;
+        let micRMS = 0;
+        let spectralCentroid = 0;
+
+        // Sensor & Baseline Calibration State
+        let baseline = { alpha: 0, beta: 0, gamma: 0, ax: 0, ay: 0, az: 1, mag: 45 };
+        let currentSensors = { alpha: 0, beta: 0, gamma: 0, ax: 0, ay: 0, az: 1, mag: 45 };
+        let entropyIndex = 0.0;
+
+        // Phonetic Formant Bank for Procedural Synthesis
+        const PHONETIC_SYLLABLES = [
+            "AH", "EH", "IH", "OH", "UH", "EE", "OO", 
+            "KA", "TA", "PA", "SA", "SH", "TH", "MM", "NN", 
+            "RA", "LA", "WH", "EX", "OM", "IS", "NO", "HE"
+        ];
+
+        const ENTITY_BANK = [
+            { name: "SPECTER-09", tone: "melancholy", words: ["LOST", "DARK", "COLD", "WHY", "HERE"] },
+            { name: "ANOMALY-X", tone: "cryptic", words: ["WATCH", "LISTEN", "BEHIND", "SOON", "WAIT"] },
+            { name: "VOICE IN STATIC", tone: "distressed", words: ["HELP", "PAIN", "SEEK", "TRUTH", "RUN"] }
+        ];
+
+        // DOM Element References
+        const powerBtn = document.getElementById('masterPowerBtn');
+        const powerIndicator = document.getElementById('powerIndicator');
+        const powerText = document.getElementById('powerText');
+        const calibrateBtn = document.getElementById('calibrateBtn');
+        const lockStatus = document.getElementById('lockStatus');
+        const ouijaBoard = document.getElementById('ouijaBoard');
+        const planchette = document.getElementById('planchette');
+        const summonBtn = document.getElementById('summonBtn');
+        const dismissBtn = document.getElementById('dismissBtn');
+        const entityStatus = document.getElementById('entityStatus');
+        const transcriptLog = document.getElementById('transcriptLog');
+        const clearLogBtn = document.getElementById('clearLogBtn');
+        const scopeCanvas = document.getElementById('scopeCanvas');
+        const scopeCtx = scopeCanvas.getContext('2d');
+
+        // Telemetry DOM
+        const teleGyro = document.getElementById('teleGyro');
+        const teleAccel = document.getElementById('teleAccel');
+        const teleMag = document.getElementById('teleMag');
+        const teleMic = document.getElementById('teleMic');
+        const entropyIndexEl = document.getElementById('entropyIndex');
+
+        // Ranges
+        const sweepSpeedRange = document.getElementById('sweepSpeedRange');
+        const sweepSpeedVal = document.getElementById('sweepSpeedVal');
+        const micGainRange = document.getElementById('micGainRange');
+        const micGainVal = document.getElementById('micGainVal');
+        const reverbRange = document.getElementById('reverbRange');
+        const reverbVal = document.getElementById('reverbVal');
+
+        // Help Modal
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeHelpBtn = document.getElementById('closeHelpBtn');
+
+        helpBtn.addEventListener('click', () => helpModal.classList.remove('hidden'));
+        closeHelpBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
+
+        // --- Board Coordinate Mapping ---
+        const charCoords = {};
+        function initBoardCoords() {
+            const boardRect = ouijaBoard.getBoundingClientRect();
+            
+            const yesEl = document.getElementById('target-yes').getBoundingClientRect();
+            charCoords['YES'] = { x: yesEl.left - boardRect.left + yesEl.width/2, y: yesEl.top - boardRect.top + yesEl.height/2 };
+
+            const noEl = document.getElementById('target-no').getBoundingClientRect();
+            charCoords['NO'] = { x: noEl.left - boardRect.left + noEl.width/2, y: noEl.top - boardRect.top + noEl.height/2 };
+
+            const goodbyeEl = document.getElementById('target-goodbye').getBoundingClientRect();
+            charCoords['GOODBYE'] = { x: goodbyeEl.left - boardRect.left + goodbyeEl.width/2, y: goodbyeEl.top - boardRect.top + goodbyeEl.height/2 };
+
+            document.querySelectorAll('.board-char').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const char = el.getAttribute('data-char');
+                charCoords[char] = {
+                    x: rect.left - boardRect.left + rect.width / 2,
+                    y: rect.top - boardRect.top + rect.height / 2
+                };
+            });
+
+            planchettePos = { x: boardRect.width / 2 - 40, y: boardRect.height / 2 - 50 };
+            targetPos = { ...planchettePos };
+        }
+
+        window.addEventListener('resize', initBoardCoords);
+        window.addEventListener('load', () => setTimeout(initBoardCoords, 100));
+
+        // --- Phone Sensors Setup ---
+        window.addEventListener('deviceorientation', (e) => {
+            currentSensors.alpha = e.alpha || 0;
+            currentSensors.beta = e.beta || 0;
+            currentSensors.gamma = e.gamma || 0;
+            updateEntropyCalculations();
+        });
+
+        window.addEventListener('devicemotion', (e) => {
+            if (e.acceleration) {
+                currentSensors.ax = e.acceleration.x || 0;
+                currentSensors.ay = e.acceleration.y || 0;
+                currentSensors.az = e.acceleration.z || 1;
+            }
+            if (e.rotationRate) {
+                currentSensors.mag = Math.abs(e.rotationRate.alpha || 0) + Math.abs(e.rotationRate.beta || 0);
+            }
+            updateEntropyCalculations();
+        });
+
+        calibrateBtn.addEventListener('click', () => {
+            baseline = { ...currentSensors };
+            isCalibrated = true;
+            lockStatus.textContent = "SURFACE LOCKED (CALIBRATED)";
+            lockStatus.className = "text-[10px] text-occult-terminal font-mono font-bold";
+            logTranscript("Surface lock calibration successful. Baseline drift locked.");
+        });
+
+        function updateEntropyCalculations() {
+            // Compute delta from baseline
+            const dBeta = Math.abs(currentSensors.beta - baseline.beta);
+            const dGamma = Math.abs(currentSensors.gamma - baseline.gamma);
+            const dAccel = Math.abs(currentSensors.ax) + Math.abs(currentSensors.ay);
+            
+            // Combine with mic RMS
+            entropyIndex = Math.min(100, (dBeta * 0.8 + dGamma * 0.8 + dAccel * 15 + micRMS * 200) * (isCalibrated ? 1.5 : 0.5));
+            
+            // Update HUD Readouts
+            teleGyro.textContent = `${currentSensors.beta.toFixed(1)} / ${currentSensors.gamma.toFixed(1)}`;
+            teleAccel.textContent = `${currentSensors.az.toFixed(2)}G`;
+            teleMag.textContent = `${(45 + currentSensors.mag).toFixed(1)}`;
+            teleMic.textContent = micRMS.toFixed(3);
+            entropyIndexEl.textContent = `${entropyIndex.toFixed(1)}%`;
+        }
+
+        // --- Web Audio & Procedural Phonetic Engine ---
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.6;
+
+            delayNode = audioCtx.createDelay();
+            delayNode.delayTime.value = 0.32;
+            delayFeedback = audioCtx.createGain();
+            delayFeedback.gain.value = 0.7;
+
+            delayNode.connect(delayFeedback);
+            delayFeedback.connect(delayNode);
+            delayNode.connect(masterGain);
+            masterGain.connect(audioCtx.destination);
+
+            // Request Microphone Entropy Access
+            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                .then(stream => {
+                    micStream = stream;
+                    micSource = audioCtx.createMediaStreamSource(stream);
+                    analyser = audioCtx.createAnalyser();
+                    analyser.fftSize = 256;
+                    micSource.connect(analyser);
+                    logTranscript("Microphone entropy stream connected.");
+                })
+                .catch(err => {
+                    logTranscript("[Notice] Microphone access denied or unavailable. Using synthetic entropy.");
+                });
+
+            startPhoneticSweep();
+        }
+
+        function analyzeMicrophone() {
+            if (!analyser) return;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+            }
+            micRMS = (sum / dataArray.length) / 255;
+            teleMic.textContent = micRMS.toFixed(3);
+        }
+
+        function startPhoneticSweep() {
+            if (!isSessionActive) return;
+            const speed = parseInt(sweepSpeedRange.value);
+
+            if (sweepInterval) clearInterval(sweepInterval);
+
+            sweepInterval = setInterval(() => {
+                if (!audioCtx || !isSessionActive) return;
+                analyzeMicrophone();
+
+                // Procedural Phonetic Synthesis: Generate formant frequencies
+                const syllable = PHONETIC_SYLLABLES[Math.floor(Math.random() * PHONETIC_SYLLABLES.length)];
+                
+                // Modulate frequency based on entropy index and pseudo-random seed
+                const baseFreq = 200 + (entropyIndex * 15) + (Math.random() * 800);
+                playPhoneticBurst(baseFreq, syllable);
+
+            }, speed);
+        }
+
+        function playPhoneticBurst(frequency, syllable) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const formantFilter = audioCtx.createBiquadFilter();
+                const gainNode = audioCtx.createGain();
+
+                osc.type = Math.random() > 0.4 ? 'sawtooth' : 'triangle';
+                osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+                formantFilter.type = 'bandpass';
+                formantFilter.frequency.setValueAtTime(frequency * 1.5, audioCtx.currentTime);
+                formantFilter.Q.value = 6.0;
+
+                const duration = 0.08 + Math.random() * 0.15;
+                gainNode.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.03);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                osc.connect(formantFilter);
+                formantFilter.connect(gainNode);
+                gainNode.connect(masterGain);
+                gainNode.connect(delayNode);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration + 0.05);
+            } catch (e) {
+                // Audio safety catch
+            }
+        }
+
+        // --- Session Power Toggle ---
+        powerBtn.addEventListener('click', () => {
+            if (!isSessionActive) {
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                isSessionActive = true;
+                powerIndicator.className = "w-2.5 h-2.5 rounded-full bg-occult-terminal shadow-[0_0_12px_#10b981]";
+                powerText.textContent = "SESSION ACTIVE";
+                powerBtn.classList.remove('from-red-950');
+                powerBtn.classList.add('from-emerald-950');
+                logTranscript("SESSION ONLINE. Phonetic synthesis engine running.");
+            } else {
+                isSessionActive = false;
+                isInvoked = false;
+                if (sweepInterval) clearInterval(sweepInterval);
+                if (micStream) micStream.getTracks().forEach(t => t.stop());
+                if (audioCtx) audioCtx.suspend();
+                powerIndicator.className = "w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_10px_#dc2626]";
+                powerText.textContent = "SESSION OFFLINE";
+                powerBtn.classList.remove('from-emerald-950');
+                powerBtn.classList.add('from-red-950');
+                entityStatus.textContent = "STATUS: DORMANT";
+                logTranscript("SESSION TERMINATED.");
+            }
+        });
+
+        // --- Invocation & Ouija Planchette Logic ---
+        summonBtn.addEventListener('click', () => {
+            if (!isSessionActive) {
+                logTranscript("ERROR: Power on session first.");
+                return;
+            }
+            if (isInvoked) return;
+
+            isInvoked = true;
+            activeEntity = ENTITY_BANK[Math.floor(Math.random() * ENTITY_BANK.length)];
+            entityStatus.textContent = `ENTITY: ${activeEntity.name}`;
+            logTranscript(`[WARNING] Presence detected: ${activeEntity.name}. Entropy coupling active.`);
+            scheduleSpiritMessage();
+        });
+
+        dismissBtn.addEventListener('click', () => {
+            if (!isInvoked) return;
+            logTranscript(`Dismissing ${activeEntity.name}...`);
+            targetQueue = ['G', 'O', 'O', 'D', 'B', 'Y', 'E'];
+            setTimeout(() => {
+                isInvoked = false;
+                activeEntity = null;
+                entityStatus.textContent = "STATUS: DORMANT";
+                logTranscript("Entity departed.");
+            }, 3000);
+        });
+
+        function scheduleSpiritMessage() {
+            if (!isInvoked || !activeEntity) return;
+
+            const roll = Math.random();
+            let word = roll < 0.35 ? (Math.random() > 0.5 ? "YES" : "NO") : activeEntity.words[Math.floor(Math.random() * activeEntity.words.length)];
+            targetQueue = word.split('');
+            logTranscript(`Spirit response channel active...`);
+
+            setTimeout(scheduleSpiritMessage, 7000 + Math.random() * 6000);
+        }
+
+        // Planchette physics & animation loop
+        function updatePlanchette() {
+            if (isInvoked && targetQueue.length > 0) {
+                const nextChar = targetQueue[0];
+                if (charCoords[nextChar]) {
+                    targetPos = {
+                        x: charCoords[nextChar].x - planchette.offsetWidth / 2,
+                        y: charCoords[nextChar].y - planchette.offsetHeight / 2
+                    };
+
+                    const dx = targetPos.x - planchettePos.x;
+                    const dy = targetPos.y - planchettePos.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < 12) {
+                        triggerLetterTap(nextChar);
+                        targetQueue.shift();
+                    }
+                }
+            } else if (!isInvoked) {
+                const boardRect = ouijaBoard.getBoundingClientRect();
+                const cx = boardRect.width / 2 - 40;
+                const cy = boardRect.height / 2 - 50;
+                // Add minor sensor jitter to planchette when resting
+                const jitterX = (currentSensors.beta * 2) + Math.sin(Date.now() / 800) * 15;
+                const jitterY = (currentSensors.gamma * 2) + Math.cos(Date.now() / 900) * 10;
+                targetPos.x = cx + jitterX;
+                targetPos.y = cy + jitterY;
+            }
+
+            planchettePos.x += (targetPos.x - planchettePos.x) * 0.1;
+            planchettePos.y += (targetPos.y - planchettePos.y) * 0.1;
+            planchette.style.transform = `translate(${planchettePos.x}px, ${planchettePos.y}px)`;
+
+            requestAnimationFrame(updatePlanchette);
+        }
+        requestAnimationFrame(updatePlanchette);
+
+        function triggerLetterTap(char) {
+            logTranscript(`> SPELL: [ ${char} ] (Confidence: ${(85 + Math.random()*14).toFixed(1)}%)`);
+            playPhoneticBurst(450, char);
+            
+            const el = document.querySelector(`[data-char="${char}"]`) || 
+                       (char === 'YES' ? document.getElementById('target-yes') : null) ||
+                       (char === 'NO' ? document.getElementById('target-no') : null) ||
+                       (char === 'GOODBYE' ? document.getElementById('target-goodbye') : null);
+
+            if (el) {
+                el.classList.add('text-occult-glow', 'scale-125');
+                setTimeout(() => el.classList.remove('text-occult-glow', 'scale-125'), 350);
+            }
+        }
+
+        // Manual board clicks
+        document.querySelectorAll('.board-char').forEach(el => {
+            el.addEventListener('click', () => {
+                const char = el.getAttribute('data-char');
+                if (charCoords[char]) {
+                    targetPos = {
+                        x: charCoords[char].x - planchette.offsetWidth / 2,
+                        y: charCoords[char].y - planchette.offsetHeight / 2
+                    };
+                    triggerLetterTap(char);
+                }
+            });
+        });
+
+        // --- Logging helper ---
+        function logTranscript(text) {
+            const time = new Date().toTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="text-gray-500">[${time}]</span> ${text}`;
+            transcriptLog.appendChild(div);
+            transcriptLog.scrollTop = transcriptLog.scrollHeight;
+        }
+
+        clearLogBtn.addEventListener('click', () => {
+            transcriptLog.innerHTML = `<div class="text-gray-500 italic">[Transcript cleared.]</div>`;
+        });
+
+        // --- Scope Canvas Visualizer ---
+        function resizeCanvas() {
+            scopeCanvas.width = scopeCanvas.parentElement.clientWidth;
+            scopeCanvas.height = scopeCanvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawScope() {
+            requestAnimationFrame(drawScope);
+            const w = scopeCanvas.width;
+            const h = scopeCanvas.height;
+
+            scopeCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            scopeCtx.fillRect(0, 0, w, h);
+
+            scopeCtx.lineWidth = 2;
+            scopeCtx.strokeStyle = isSessionActive ? '#10b981' : '#462c5b';
+            scopeCtx.beginPath();
+
+            const sliceWidth = w / 45;
+            let x = 0;
+
+            for (let i = 0; i < 45; i++) {
+                const v = isSessionActive ? (Math.random() * 0.7 + micRMS * 3) * Math.sin(Date.now() / 90 + i) : 0.05;
+                const y = (v * h / 2) + (h / 2);
+
+                if (i === 0) scopeCtx.moveTo(x, y);
+                else scopeCtx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            scopeCtx.stroke();
+        }
+        drawScope();
+
+        // --- Slider Listeners ---
+        sweepSpeedRange.addEventListener('input', (e) => {
+            sweepSpeedVal.textContent = `${e.target.value} ms`;
+            if (isSessionActive) startPhoneticSweep();
+        });
+
+        micGainRange.addEventListener('input', (e) => {
+            micGainVal.textContent = `${e.target.value}%`;
+        });
+
+        reverbRange.addEventListener('input', (e) => {
+            reverbVal.textContent = `${e.target.value}%`;
+            if (delayFeedback) {
+                delayFeedback.gain.value = e.target.value / 100 * 0.9;
+            }
+        });
+    </script>
+</body>
+</html>
